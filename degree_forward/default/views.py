@@ -1,6 +1,18 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-# Create your views here.
+
 def index(request):
-	return HttpResponse("Pancakes")
+    return render(request, 'application.html')
+
+
+def plan(request):
+    return render(request, 'plan.html')
+
+
+def importScreen(request):
+    return render(request, 'import.html')
+
+
+def options(request):
+    return render(request, 'options.html')
