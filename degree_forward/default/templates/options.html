@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Degree Forward</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <h1>Degree Planning Options</h1>
+    <div class = "container-fluid">
+        Choose a 4-year plan:
+        <div class="dropdown" style="min-width: 100%">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" id="planbtn">None <span class="caret"></span></button>
+            <ul class="dropdown-menu" id="plan">
+                {% for plan in plans %}
+                <li><a onclick=""> {{ plan.Major }} </a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <button class="btn" onclick="submit()">Generate Pan</button>
+    </div>
+    <script>
+        change("plan");
+        function change(dropdown){
+            $('#'+dropdown).on('click', 'li a', function(){
+                $('#'+dropdown+"btn").html($(this).text()+' <span class="caret"></span>');
+                $('#'+dropdown+"btn").val($(this).text());
+            });
+        };
+
+        function submit(){
+            var planChoice = $('#planbtn').val();
+            if(planChoice == ""){
+                alert('You must choose something in order to continue');
+            }
+            else {
+                alert(planChoice);
+            }
+        }
+    </script>
+</body>
+</html>

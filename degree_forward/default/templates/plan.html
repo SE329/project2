@@ -1,0 +1,153 @@
+{% load array_access %}
+<!DOCTYPE html>
+<html lang="en" style="min-height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <title>Degree Forward</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body style="min-height: 100%">
+    <div class="container-fluid col-xs-9" style="background-color: lightgrey; padding-top: 20px; padding-bottom: 20px; min-height: 100%">
+        <div class="container-fluid" style="margin-bottom:20px">
+            {{ plan }} - {{ credits }} credits
+        </div>
+        <div class="container-fluid">
+            {% for list in classList %}
+            <div class="container-fluid" style="outline: 1px solid grey; margin-bottom: 10px" id="{{ forloop.counter }}">
+                <div class = "container col-xs-2" style="margin-top: 10px; margin-bottom: 10px">
+                    {% with forloop.counter as x %}
+                    Semester {{ x }} <br>
+                    Credits: <div id="{{ x }}credits" style="display: inline">{{ semCredits|lookup:x }}</div>
+                    <input type="hidden" id="{{ x }}-crs" value="{{ semCredits|lookup:x }}">
+                    {% endwith %}
+                </div>
+                {% for class in list %}
+                <div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="{{ class.code }}">
+                    <div class="container-fluid" style="outline: 1px solid black" onclick="edit('{{ class.code }}')" id="{{ class.code }}inner">
+                        {{ class.code }} - {{ class.credits }} crs
+                        <input type="hidden" id="{{ class.code }}-sem" value="{{ forloop.parentloop.counter }}">
+                        <input type="hidden" id="{{ class.code }}-prereqs" value="{{ class.prereqs }}">
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="{{ class.code }}">
+                    <div class="container-fluid" style="outline: 1px solid black" onclick="addStuff()">
+                        Add Class
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="container-fluid col-xs-3 fill" style="background-color: grey; padding-top: 30px; min-height: 100%">
+        <div class="container">
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" id="planbtn">Select a New Plan <span class="caret"></span></button>
+                <ul class="dropdown-menu" id="plan">
+                    {% for p in allplans %}
+                    <li><a onclick=""> {{ p.Major }} </a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <br>
+        <div class="container-fluid" style="margin-bottom: 30px; border-bottom: 10px">
+            <div class="container-fluid">
+                <button class="btn btn-primary" style="margin-bottom: 10px" onclick="addStuff()">Add a Course</button>
+            </div>
+            <div class="container-fluid" style="outline: 1px solid black; background-color: white; margin-bottom: 5px">
+                <div class="col-xs-4">Pancakes</div>
+                <div class="col-xs-6 col-xs-offset-2"><button onclick="panic()">Auto Add</button><br><button onclick="panic()">Delete</button></div>
+            </div>
+        </div>
+        <div class="container-fluid" style="outline: 1px solid black; margin-bottom: 30px">
+            Completed Courses:
+            <div class = "container-fluid" id="completed">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        change("plan");
+        change("semester");
+
+        function panic(){
+            alert("Feature Unimplemented");
+        }
+
+        function edit(classcode, semester){
+            var x = window.prompt("Please Type the command you wish to perform (Choices are Move/Check/Uncheck/Delete)");
+            if(x == null) return;
+            if(x.toLowerCase() == 'move'){
+                var destSem = window.prompt("Which semester would you like to move this class to?")
+            }
+            else if(x.toLowerCase() == 'check'){
+                 if($("div[id='" + classcode + "inner']").css("background-color") == "transparent") {
+                     $("div[id='" + classcode + "inner']").css("background-color", "lightgreen");
+                     var content = document.getElementById(classcode + "inner").innerHTML;
+                     document.getElementById("completed").innerHTML += '<p>'+content+'</p>';
+                     changeCredits(classcode, 0);
+                 }
+            }
+            else if(x.toLowerCase() == 'uncheck') {
+                if($("div[id='" + classcode + "inner']").css("background-color") == "rgb(144, 238, 144)") {
+                    $("div[id='" + classcode + "inner']").css("background-color", "");
+                    var content = document.getElementById(classcode + "inner").innerHTML;
+                    var complete = document.getElementById("completed").innerHTML;
+                    complete2 = complete.replace('<p>'+content+'</p>', "");
+                    document.getElementById("completed").innerHTML = complete2;
+                    changeCredits(classcode, 1)
+                }
+            }
+            else if(x.toLowerCase() == 'delete'){
+                if($("div[id='" + classcode + "inner']").css("background-color") == "transparent") changeCredits(classcode, 0);
+                var div = document.getElementById(classcode);
+                div.parentNode.removeChild(div);
+            }
+            else{
+                alert("Invalid Input. Try Again.");
+                edit(classcode);
+            }
+        }
+
+        function changeCredits(classcode, add){
+            var classStr = $("div[id='" + classcode + "inner']").text();
+            var crs = parseInt(classStr.substr(classStr.indexOf('crs')-2, 1));
+            var semester = document.getElementById(classcode+'-sem').value;
+            var semCrs = parseInt(document.getElementById(semester+'credits').innerHTML);
+            var newCrs = 0;
+
+            if(add) newCrs = semCrs + crs;
+            else newCrs = semCrs - crs;
+
+            document.getElementById(semester+'credits').innerHTML = newCrs;
+        }
+
+        function moveClass(classcode, destSem){
+            var classStr = $("div[id='" + classcode + "inner']").text();
+            var crs = parseInt(classStr.substr(classStr.indexOf('crs')-2, 1));
+            var writestring = '<div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="'+classcode+'"><div class="container-fluid" style="outline: 1px solid black" onclick="edit(\''+classcode+'\')" id="'+classcode+'inner">'+classcode+' - '+credits+' crs<input type="hidden" id="'+credits+'-sem" value="'+destSem+'"></div></div>';
+
+
+        }
+
+        function addStuff(){
+            alert("I will add this in some amount of time.")
+        }
+
+        function addClass(){
+            var cc = window.prompt("What class are you wanting to add?");
+        }
+
+        function change(dropdown){
+            $('#'+dropdown).on('click', 'li a', function(){
+                $('#'+dropdown+"btn").html($(this).text()+' <span class="caret"></span>');
+                $('#'+dropdown+"btn").val($(this).text());
+            });
+        }
+    </script>
+</body>
+</html>
