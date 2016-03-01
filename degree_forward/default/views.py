@@ -12,6 +12,7 @@ def plan(request):
     requestedplan = 'Software Engineering'
     useplan = DegreePlan.objects.get(Major=requestedplan)
     plans = DegreePlan.objects.all()
+    classes = ClassListing.objects.all()
     semesters = [useplan.Semester1, useplan.Semester2, useplan.Semester3, useplan.Semester4, useplan.Semester5,
                  useplan.Semester6, useplan.Semester7, useplan.Semester8]
     classlist = []
@@ -31,6 +32,7 @@ def plan(request):
 
     context = {
         'allplans': plans,
+        'allclasses': classes,
         'plan' : requestedplan,
         'credits' : useplan.Credits,
         'classList': classlist,

@@ -130,8 +130,6 @@
             var classStr = $("div[id='" + classcode + "inner']").text();
             var crs = parseInt(classStr.substr(classStr.indexOf('crs')-2, 1));
             var writestring = '<div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="'+classcode+'"><div class="container-fluid" style="outline: 1px solid black" onclick="edit(\''+classcode+'\')" id="'+classcode+'inner">'+classcode+' - '+credits+' crs<input type="hidden" id="'+credits+'-sem" value="'+destSem+'"></div></div>';
-
-
         }
 
         function addStuff(){
@@ -149,5 +147,10 @@
             });
         }
     </script>
+    <div class="hidden">
+        {% for class in allclasses %}
+        <input type="hidden" id="{{ class.code }}-info" value="{{ class.credits }},{{ class.prereqs }},{{ class.satisfies }}">
+        {% endfor %}
+    </div>
 </body>
 </html>
