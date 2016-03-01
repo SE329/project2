@@ -12,15 +12,9 @@ class ClassListing(models.Model):
     )
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
-    desc = models.TextField()
     term = models.CharField(max_length=3,choices=CLASS_TERM_CHOICES,default='FS')
     credits = models.IntegerField()
-
-
-class Requirement(models.Model):
-    Class = models.ForeignKey(ClassListing)
-    PreReq = models.ForeignKey(ClassListing, related_name='Prereqs')
-    CoReq = models.ForeignKey(ClassListing, related_name='Coreqs')
+    prereqs = models.TextField(default='NONE')
 
 
 class Semester(models.Model):
@@ -31,11 +25,7 @@ class Semester(models.Model):
     )
     Number = models.IntegerField()
     Term = models.CharField(max_length=2, choices=TERM_CHOICES)
-
-
-class SemClass(models.Model):
-    Semester = models.ForeignKey(Semester)
-    Class = models.ForeignKey(ClassListing)
+    Classes = models.TextField(null=True)
 
 
 class DegreePlan(models.Model):
@@ -46,8 +36,13 @@ class DegreePlan(models.Model):
     Major = models.CharField(max_length=30, primary_key=True)
     Credits = models.IntegerField()
     Entry = models.CharField(max_length=1, choices=ENTRY_TERM_CHOICES, default='F"')
+    Semester1 = models.ForeignKey(Semester, related_name="sem1", null=True)
+    Semester2 = models.ForeignKey(Semester, related_name="sem2", null=True)
+    Semester3 = models.ForeignKey(Semester, related_name="sem3", null=True)
+    Semester4 = models.ForeignKey(Semester, related_name="sem4", null=True)
+    Semester5 = models.ForeignKey(Semester, related_name="sem5", null=True)
+    Semester6 = models.ForeignKey(Semester, related_name="sem6", null=True)
+    Semester7 = models.ForeignKey(Semester, related_name="sem7", null=True)
+    Semester8 = models.ForeignKey(Semester, related_name="sem8", null=True)
 
 
-class DegreeSem(models.Model):
-    Degree = models.ForeignKey(DegreePlan)
-    Semester = models.ForeignKey(Semester)
