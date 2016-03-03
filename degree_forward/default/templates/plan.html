@@ -24,35 +24,35 @@
                     {% endwith %}
                 </div>
                 {% for class in list %}
-                <div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="{{ class.code }}">
-                    <div class="container-fluid" style="outline: 1px solid black" onclick="edit('{{ class.code }}')" id="{{ class.code }}inner">
-                        {{ class.code }} - {{ class.credits }} crs
+                <div class="container col-xs-1 {{ forloop.parentloop.counter }}class" style="margin-top: 10px; margin-bottom: 10px; margin-right: 30px;" id="{{ class.code }}">
+                    <button class="container-fluid" style="outline: 1px solid black; width: 65px" onclick="edit('{{ class.code }}')" id="{{ class.code }}inner">
+                        {{ class.code }} {{ class.credits }} cr
                         <input type="hidden" id="{{ class.code }}-sem" value="{{ forloop.parentloop.counter }}">
                         <input type="hidden" id="{{ class.code }}-prereqs" value="{{ class.prereqs }}">
-                    </div>
+                    </button>
                 </div>
                 {% endfor %}
-                <div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="{{ class.code }}">
-                    <div class="container-fluid" style="outline: 1px solid black" onclick="addStuff()">
+                <div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="add{{ forloop.counter }}">
+                    <button class="container-fluid" style="outline: 1px solid black; width: 60px; " onclick="addClass('{{ forloop.counter }}')">
                         Add Class
-                    </div>
+                    </button>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
     <div class="container-fluid col-xs-3 fill" style="background-color: grey; padding-top: 30px; min-height: 100%">
-        <div class="container">
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" id="planbtn">Select a New Plan <span class="caret"></span></button>
-                <ul class="dropdown-menu" id="plan">
-                    {% for p in allplans %}
-                    <li><a onclick=""> {{ p.Major }} </a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+        <form action="/plan/" method="POST">{% csrf_token %}
+            <select name="plan">
+                {% for plan in allplans %}
+                <option value="{{ plan.Major }}">{{ plan.Major }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Generate Plan">
+        </form>
         <br>
+
+        <!--
         <div class="container-fluid" style="margin-bottom: 30px; border-bottom: 10px">
             <div class="container-fluid">
                 <button class="btn btn-primary" style="margin-bottom: 10px" onclick="addStuff()">Add a Course</button>
@@ -62,7 +62,8 @@
                 <div class="col-xs-6 col-xs-offset-2"><button onclick="panic()">Auto Add</button><br><button onclick="panic()">Delete</button></div>
             </div>
         </div>
-        <div class="container-fluid" style="outline: 1px solid black; margin-bottom: 30px">
+        -->
+        <div class="container-fluid" style="outline: 1px solid black; margin-bottom: 30px; background-color: lightblue">
             Completed Courses:
             <div class = "container-fluid" id="completed">
 
@@ -83,18 +84,31 @@
             if(x == null) return;
             if(x.toLowerCase() == 'move'){
                 var destSem = window.prompt("Which semester would you like to move this class to?")
+                moveClass(classcode, destSem);
             }
             else if(x.toLowerCase() == 'check'){
-                 if($("div[id='" + classcode + "inner']").css("background-color") == "transparent") {
-                     $("div[id='" + classcode + "inner']").css("background-color", "lightgreen");
-                     var content = document.getElementById(classcode + "inner").innerHTML;
-                     document.getElementById("completed").innerHTML += '<p>'+content+'</p>';
-                     changeCredits(classcode, 0);
+                 if(document.getElementById(classcode + "inner").style.backgroundColor == "") {
+                      var info = document.getElementById(classcode + '-info').value;
+                      var infos = info.split(',');
+                      var prereqs = infos[1].split(';');
+                      if (prereqs[0] != 'NONE') {
+                          for (var i = 0; i < prereqs.length; i++) {
+                              pr = prereqs[i];
+                              if (!(document.getElementById("completed").innerHTML.contains(pr))) {
+                                  alert("Unable to move class due to dependency problems. You can't complete "+classcode+" without completing "+pr);
+                                  return;
+                              }
+                          }
+                      }
+                      document.getElementById(classcode + "inner").style.backgroundColor = "lightgreen";
+                      var content = document.getElementById(classcode + "inner").innerHTML;
+                      document.getElementById("completed").innerHTML += '<p>'+content+'</p>';
+                      changeCredits(classcode, 0);
                  }
             }
             else if(x.toLowerCase() == 'uncheck') {
-                if($("div[id='" + classcode + "inner']").css("background-color") == "rgb(144, 238, 144)") {
-                    $("div[id='" + classcode + "inner']").css("background-color", "");
+                if(document.getElementById(classcode + "inner").style.backgroundColor == "lightgreen") {
+                    document.getElementById(classcode + "inner").style.backgroundColor = "";
                     var content = document.getElementById(classcode + "inner").innerHTML;
                     var complete = document.getElementById("completed").innerHTML;
                     complete2 = complete.replace('<p>'+content+'</p>', "");
@@ -103,7 +117,7 @@
                 }
             }
             else if(x.toLowerCase() == 'delete'){
-                if($("div[id='" + classcode + "inner']").css("background-color") == "transparent") changeCredits(classcode, 0);
+                if(document.getElementById(classcode + "inner").style.backgroundColor == "") changeCredits(classcode, 0);
                 var div = document.getElementById(classcode);
                 div.parentNode.removeChild(div);
             }
@@ -113,10 +127,11 @@
             }
         }
 
-        function changeCredits(classcode, add){
-            var classStr = $("div[id='" + classcode + "inner']").text();
-            var crs = parseInt(classStr.substr(classStr.indexOf('crs')-2, 1));
-            var semester = document.getElementById(classcode+'-sem').value;
+        function changeCredits(cc, add){
+            var classStr = document.getElementById(cc + '-info').value;
+            var infos = classStr.split(',');
+            var crs = parseInt(infos[0]);
+            var semester = document.getElementById(cc+'-sem').value;
             var semCrs = parseInt(document.getElementById(semester+'credits').innerHTML);
             var newCrs = 0;
 
@@ -126,19 +141,117 @@
             document.getElementById(semester+'credits').innerHTML = newCrs;
         }
 
-        function moveClass(classcode, destSem){
-            var classStr = $("div[id='" + classcode + "inner']").text();
-            var crs = parseInt(classStr.substr(classStr.indexOf('crs')-2, 1));
-            var writestring = '<div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="'+classcode+'"><div class="container-fluid" style="outline: 1px solid black" onclick="edit(\''+classcode+'\')" id="'+classcode+'inner">'+classcode+' - '+credits+' crs<input type="hidden" id="'+credits+'-sem" value="'+destSem+'"></div></div>';
+        function moveClass(cc, dest) {
+            var info = document.getElementById(cc + '-info').value;
+            var infos = info.split(',');
+            var prereqs = infos[1].split(';');
+            if (prereqs[0] != 'NONE') {
+                for (var i = 0; i < prereqs.length; i++) {
+                    var pr = prereqs[i].toUpperCase();
+                    var prsem = document.getElementById(pr + '-sem').value;
+                    if (dest >= prsem && prsem != 0) {
+                        alert("Unable to move class due to dependency problems. You must have " + pr + " before you can take " + cc);
+                        return;
+                    }
+                }
+            }
+            var j = dest;
+            while (dest > 0) {
+                var a = document.getElementsByClassName(j + 'class');
+                for (var k = 0; k < a.length; k++) {
+                    var curClass = a[k].id;
+
+                    var curInfos = document.getElementById(curClass + '-info').value.split(',');
+                    var curPreqs = curInfos[1].split(';');
+                    if (curPreqs[0] != 'NONE') {
+                        for (var i = 0; i < prereqs.length; i++) {
+                            var cpr = curPreqs[i].toUpperCase();
+                            var cprsem = document.getElementById(curClass + '-sem').value;
+                            if (dest >= cprsem && cprsem != 0) {
+                                alert("Unable to move class due to dependency problems. "+ cc +" must not occur before "+ cpr);
+                                return;
+                            }
+                        }
+                    }
+                }
+                j--;
+            }
+                changeCredits(cc, 0);
+                var div = document.getElementById(cc);
+                div.parentNode.removeChild(div);
+                var adddiv = document.getElementById("add" + dest);
+                adddiv.parentNode.removeChild(adddiv);
+                var writestring = '<div class="container col-xs-1 ' + dest + 'class" style="margin-top: 10px; margin-bottom: 10px; margin-right: 30px;" id="' + cc + '">' +
+                        '<button class="container-fluid" style="outline: 1px solid black; width: 65px" onclick="edit(\'' + cc + '\')" id="' + cc + 'inner">' +
+                        cc + ' ' + infos[0] + ' cr' +
+                        '<input type="hidden" id="' + cc + '-sem" value="' + dest + '">' +
+                        '<input type="hidden" id="' + cc + '-prereqs" value="' + infos[1] + '">' +
+                        '</button>' +
+                        '</div>';
+                document.getElementById(dest).innerHTML += writestring;
+                changeCredits(cc, 1);
+                document.getElementById(dest).innerHTML += '<div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="add' + dest + '">' +
+                        '<button class="container-fluid" style="outline: 1px solid black; width: 60px" onclick="addClass(\'' + dest + '\')">' +
+                        'Add Class' +
+                        '</button>' +
+                        '</div>';
         }
 
         function addStuff(){
             alert("I will add this in some amount of time.")
         }
 
-        function addClass(){
-            var cc = window.prompt("What class are you wanting to add?");
+        function addClass(dest) {
+            var prompt = window.prompt("What class code are you wanting to add? (ex. MATH 165)");
+            if (prompt != null) {
+                var cc = prompt.toUpperCase();
+                var info = document.getElementById(cc + '-info').value;
+                if (document.getElementById(cc) == null) {
+                    if (info.contains(',')) {
+                        var infos = info.split(',');
+                        var prereqs = infos[1].split(';');
+                        if (prereqs[0] != 'NONE') {
+                            for (var i = 0; i < prereqs.length; i++) {
+                                var pr = prereqs[i].toUpperCase();
+                                var prsem = document.getElementById(pr + '-sem').value()
+                                if (dest <= prsem) {
+                                    alert("Unable to add class due to dependency problems. You must have " + pr + " before you can take " + cc);
+                                    return;
+                                }
+                            }
+                        }
+                        var div = document.getElementById("add" + dest);
+                        div.parentNode.removeChild(div);
+                        var writestring = '<div class="container col-xs-1 '+dest+'class" style="margin-top: 10px; margin-bottom: 10px; margin-right: 30px;" id="' + cc + '">' +
+                                '<button class="container-fluid" style="outline: 1px solid black; margin-right:5px; width: 65px" onclick="edit(\'' + cc + '\')" id="' + cc + 'inner">' +
+                                cc + ' ' + infos[0] + ' crs' +
+                                '<input type="hidden" id="' + cc + '-sem" value="' + dest + '">' +
+                                '<input type="hidden" id="' + cc + '-prereqs" value="' + infos[1] + '">' +
+                                '</button>' +
+                                '</div>';
+                        document.getElementById(dest).innerHTML += writestring;
+                        changeCredits(cc, 1);
+                        document.getElementById(dest).innerHTML += '<div class="container col-xs-1" style="margin-top: 10px; margin-bottom: 10px" id="add' + dest + '">' +
+                                '<button class="container-fluid" style="outline: 1px solid black; width: 60px;" onclick="addClass(\'' + dest + '\')">' +
+                                'Add Class' +
+                                '</button>' +
+                                '</div>';
+                    }
+                    else {
+                        alert("That class is not available");
+                        return;
+                    }
+                }
+                else {
+                    alert("Course is already present");
+                    return;
+                }
+            }
+            else {
+                return;
+            }
         }
+
 
         function change(dropdown){
             $('#'+dropdown).on('click', 'li a', function(){

@@ -15,6 +15,7 @@ class ClassListing(models.Model):
     term = models.CharField(max_length=3, choices=CLASS_TERM_CHOICES, default='FS')
     credits = models.IntegerField()
     prereqs = models.TextField(default='NONE')
+    coreqs = models.TextField(default='NONE')
     satisfies = models.TextField(default='NONE')
 
 
