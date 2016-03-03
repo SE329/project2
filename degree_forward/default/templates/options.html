@@ -11,16 +11,14 @@
     <h1>Degree Planning Options</h1>
     <div class = "container-fluid">
         Choose a 4-year plan:
-        <div class="dropdown" style="min-width: 100%">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" id="planbtn">None <span class="caret"></span></button>
-            <ul class="dropdown-menu" id="plan">
+        <form action="/plan/" method="POST">{% csrf_token %}
+            <select name="plan">
                 {% for plan in plans %}
-                <li><a onclick=""> {{ plan.Major }} </a></li>
+                <option value="{{ plan.Major }}">{{ plan.Major }}</option>
                 {% endfor %}
-            </ul>
-        </div>
-        <button class="btn" onclick="submit()">Generate Pan</button>
-    </div>
+            </select>
+            <input type="submit" value="Generate Plan">
+        </form>
     <script>
         change("plan");
         function change(dropdown){
@@ -30,15 +28,6 @@
             });
         };
 
-        function submit(){
-            var planChoice = $('#planbtn').val();
-            if(planChoice == ""){
-                alert('You must choose something in order to continue');
-            }
-            else {
-                alert(planChoice);
-            }
-        }
     </script>
 </body>
 </html>

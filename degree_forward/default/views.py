@@ -9,7 +9,10 @@ def index(request):
 
 
 def plan(request):
-    requestedplan = 'Software Engineering'
+    requestedplan = request.POST.get("plan","")
+    print(request)
+    if requestedplan == '':
+        requestedplan = 'NONE'
     useplan = DegreePlan.objects.get(Major=requestedplan)
     plans = DegreePlan.objects.all()
     classes = ClassListing.objects.all()
@@ -41,9 +44,6 @@ def plan(request):
 
     return render(request, 'plan.html', context)
 
-
-def importScreen(request):
-    return render(request, 'import.html')
 
 
 def options(request):
