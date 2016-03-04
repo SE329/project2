@@ -3,11 +3,6 @@ from .models import *
 
 # Register your models here.
 
-#admin.site.register(DegreePlan)
-#admin.site.register(Semester)
-#admin.site.register(ClassListing)
-#admin.site.register(Requirement)
-
 
 @admin.register(DegreePlan)
 class DegreePlanAdmin(admin.ModelAdmin):

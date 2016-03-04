@@ -5,7 +5,11 @@ from .models import *
 
 
 def index(request):
-    return render(request, 'application.html')
+    useplan = DegreePlan.objects.all()
+    context = {
+        'plans': useplan
+    }
+    return render(request, 'application.html', context)
 
 
 def plan(request):
@@ -16,6 +20,23 @@ def plan(request):
     useplan = DegreePlan.objects.get(Major=requestedplan)
     plans = DegreePlan.objects.all()
     classes = ClassListing.objects.all()
+    ClassString = ""
+    ClassCategories = []
+    for c in classes:
+        codes = c.code.split(' ');
+        category = ""
+        for item in codes:
+            if not tryint(item):
+                category += item + ' '
+        if category not in ClassCategories:
+            ClassCategories.append(category)
+        ClassString += c.code
+        ClassString += ';'
+
+    categories = ""
+    for c in ClassCategories:
+        categories += c + ';'
+
     semesters = [useplan.Semester1, useplan.Semester2, useplan.Semester3, useplan.Semester4, useplan.Semester5,
                  useplan.Semester6, useplan.Semester7, useplan.Semester8]
     classlist = []
@@ -34,6 +55,8 @@ def plan(request):
         semCredits.append(scredits)
 
     context = {
+        'categories': categories,
+        'classString': ClassString,
         'allplans': plans,
         'allclasses': classes,
         'plan' : requestedplan,
@@ -45,11 +68,9 @@ def plan(request):
     return render(request, 'plan.html', context)
 
 
-
-def options(request):
-    useplan = DegreePlan.objects.all()
-    context = {
-        'plans': useplan
-    }
-    return render(request, 'options.html', context)
-
+def tryint(val):
+    try:
+        int(val)
+        return True
+    except ValueError:
+        return False
