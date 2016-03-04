@@ -92,7 +92,6 @@
                           for (var i = 0; i < prereqs.length; i++) {
                               pr = prereqs[i];
                               if (!(document.getElementById("completed").innerHTML.indexOf(pr.trim()) > -1)) {
-                                  alert(pr);
                                   alert("WARNING: Degree Plan invalid. You can't complete "+classcode+" without completing "+prereqs[i]);
                               }
                           }
@@ -227,9 +226,7 @@
                         if(document.getElementById("completed").innerHTML.indexOf(prompt) > -1){
                             var searchString = '<p>'+cc + ' ' + infos[0] + ' cr</p>';
                             var html = document.getElementById("completed").innerHTML;
-                            alert(html);
                             var html2 = html.replace(searchString,"");
-                            alert(html2);
                             document.getElementById("completed").innerHTML = html2;
                         }
                         var writestring = '<div class="container col-xs-1 '+dest+'class" style="margin-top: 10px; margin-bottom: 10px; margin-right: 30px;" id="' + cc + '">' +
