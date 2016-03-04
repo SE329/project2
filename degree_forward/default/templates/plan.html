@@ -91,7 +91,7 @@
                       if (prereqs[0] != 'NONE') {
                           for (var i = 0; i < prereqs.length; i++) {
                               pr = prereqs[i];
-                              if (!(document.getElementById("completed").innerHTML.contains(pr))) {
+                              if (!(document.getElementById("completed").innerHTML.indexOf(pr) > -1)) {
                                   alert("WARNING: Degree Plan invalid. You can't complete "+classcode+" without completing "+pr);
                               }
                           }
@@ -119,8 +119,13 @@
                     var content = document.getElementById(classcode + "inner").innerHTML;
                     document.getElementById("completed").innerHTML += '<p>'+content+'</p>';
                 }
-                var div = document.getElementById(classcode);
-                div.parentNode.removeChild(div);
+                else if(choice.toLowerCase() == 'no'){
+                    var div = document.getElementById(classcode);
+                    div.parentNode.removeChild(div);
+                }
+                else {
+                    alert("Invald input. Please Try Again.");
+                }
             }
             else{
                 alert("Invalid Input. Try Again.");
@@ -161,7 +166,7 @@
                 for (var i = 0; i < prereqs.length; i++) {
                     var pr = prereqs[i].toUpperCase();
                     var prsem = document.getElementById(pr + '-sem').value;
-                    if (dest >= prsem && prsem != 0) {
+                    if (dest <= prsem && prsem != 0) {
                         alert("Unable to move class due to dependency problems. You must have " + pr + " before you can take " + cc);
                         return;
                     }
@@ -177,7 +182,7 @@
                     if(preqs.indexOf(cc) > -1) {
                         var cprsem = document.getElementById(curClass + '-sem').value;
                         if (dest >= cprsem && cprsem != 0) {
-                            alert("Unable to move class due to dependency problems. " + cc + " must not occur before " + cpr);
+                            alert("Unable to move class due to dependency problems. " + cc + " must not occur before " + curClass);
                             return;
                         }
                     }
@@ -203,7 +208,7 @@
                 var cc = prompt.toUpperCase();
                 var info = document.getElementById(cc + '-info').value;
                 if (document.getElementById(cc) == null) {
-                    if (info.contains(',')) {
+                    if (info.indexOf(',') > -1) {
                         var infos = info.split(',');
                         var prereqs = infos[1].split(';');
                         if (prereqs[0] != 'NONE') {
