@@ -77,7 +77,7 @@
         loadCatDropdown();
 
         function edit(classcode, semester){
-            var x = window.prompt("Please Type the command you wish to perform (Choices are Move/Complete/Incomplete/Delete)");
+            var x = window.prompt("Please Type the command you wish to perform (Choices are Move/Complete/Incomplete/Delete)").trim();
             if(x == null) return;
             if(x.toLowerCase() == 'move'){
                 var destSem = window.prompt("Which semester would you like to move this class to?")
@@ -91,8 +91,8 @@
                       if (prereqs[0] != 'NONE') {
                           for (var i = 0; i < prereqs.length; i++) {
                               pr = prereqs[i];
-                              if (!(document.getElementById("completed").innerHTML.indexOf(pr) > -1)) {
-                                  alert("WARNING: Degree Plan invalid. You can't complete "+classcode+" without completing "+pr);
+                              if (!(document.getElementById("completed").innerHTML.indexOf(pr.trim()) > -1)) {
+                                  alert("WARNING: Degree Plan invalid. You can't complete "+classcode+" without completing "+prereqs[i]);
                               }
                           }
                       }
@@ -118,6 +118,8 @@
                 if(choice.toLowerCase() == 'yes'){
                     var content = document.getElementById(classcode + "inner").innerHTML;
                     document.getElementById("completed").innerHTML += '<p>'+content+'</p>';
+                    var div = document.getElementById(classcode);
+                    div.parentNode.removeChild(div);
                 }
                 else if(choice.toLowerCase() == 'no'){
                     var div = document.getElementById(classcode);
@@ -224,9 +226,7 @@
                         if(document.getElementById("completed").innerHTML.indexOf(prompt) > -1){
                             var searchString = '<p>'+cc + ' ' + infos[0] + ' cr</p>';
                             var html = document.getElementById("completed").innerHTML;
-                            alert(html);
                             var html2 = html.replace(searchString,"");
-                            alert(html2);
                             document.getElementById("completed").innerHTML = html2;
                         }
                         var writestring = '<div class="container col-xs-1 '+dest+'class" style="margin-top: 10px; margin-bottom: 10px; margin-right: 30px;" id="' + cc + '">' +
