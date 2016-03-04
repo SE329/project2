@@ -14,8 +14,16 @@
     <div class="container-fluid col-xs-8 col-xs-offset-2">
         <h3 style="text-align: center">Degree planning is tedious. Let us help you with it!</h3>
         <div class="container col-xs-8 col-xs-offset-2">
-            <div class="container col-xs-4 col-xs-offset-4">
-                <button class="btn btn-default btn-primary" onclick="onClick('/options/')">Let's Get Started!</button>
+            <div class="container col-xs-9 col-xs-offset-2">
+                <form action="/plan/" method="POST">{% csrf_token %}
+                    Choose your plan:
+                    <select name="plan">
+                        {% for plan in plans %}
+                        <option value="{{ plan.Major }}">{{ plan.Major }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" class="btn btn-default btn-primary" value="Let's Get Started">
+                </form>
             </div>
         </div>
     </div>
