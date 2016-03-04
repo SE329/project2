@@ -77,7 +77,7 @@
         loadCatDropdown();
 
         function edit(classcode, semester){
-            var x = window.prompt("Please Type the command you wish to perform (Choices are Move/Complete/Incomplete/Delete)");
+            var x = window.prompt("Please Type the command you wish to perform (Choices are Move/Complete/Incomplete/Delete)").trim();
             if(x == null) return;
             if(x.toLowerCase() == 'move'){
                 var destSem = window.prompt("Which semester would you like to move this class to?")
@@ -91,8 +91,9 @@
                       if (prereqs[0] != 'NONE') {
                           for (var i = 0; i < prereqs.length; i++) {
                               pr = prereqs[i];
-                              if (!(document.getElementById("completed").innerHTML.indexOf(pr) > -1)) {
-                                  alert("WARNING: Degree Plan invalid. You can't complete "+classcode+" without completing "+pr);
+                              if (!(document.getElementById("completed").innerHTML.indexOf(pr.trim()) > -1)) {
+                                  alert(pr);
+                                  alert("WARNING: Degree Plan invalid. You can't complete "+classcode+" without completing "+prereqs[i]);
                               }
                           }
                       }
@@ -118,6 +119,8 @@
                 if(choice.toLowerCase() == 'yes'){
                     var content = document.getElementById(classcode + "inner").innerHTML;
                     document.getElementById("completed").innerHTML += '<p>'+content+'</p>';
+                    var div = document.getElementById(classcode);
+                    div.parentNode.removeChild(div);
                 }
                 else if(choice.toLowerCase() == 'no'){
                     var div = document.getElementById(classcode);
